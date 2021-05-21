@@ -9,25 +9,25 @@ View(biomass2015)
 
 # excluding irrelevant columns
 biomass_clean <- biomass2015 %>%
-  
+
   #selecting only relevant columns
   select(plot, production) %>%
-  
+
   #excluding NA values
   filter(!is.na(production)) %>%
-  
+
   #grouping by plot
   group_by(plot) %>%
-  
+
   #getting sum by plot
   summarise(biomass_sum = sum(production))
 
 View(biomass_clean)
 
-
+##Anne was here
 
 biomass_barplot <- ggplot(biomass_clean,
-                          aes(x = plot, 
+                          aes(x = plot,
                               y = biomass_sum)) + geom_bar(stat = "identity")
 
 print(biomass_barplot)
