@@ -24,7 +24,7 @@ biomass_clean <- biomass2015 %>%
 
 View(biomass_clean)
 
-##Anne was here
+##Anne was here ##
 
 biomass_barplot <- ggplot(biomass_clean,
                           aes(x = plot,
