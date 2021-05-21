@@ -1,0 +1,75 @@
+---
+title: "R-tutorials"
+author: "Moritz Haderer"
+date: "5/19/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r eval=FALSE, include=TRUE}
+devtools::install_github("biostats-r/biostats.tutorials")
+library(biostats.tutorials)
+
+```
+
+```{r eval=FALSE, include=TRUE}
+learnr::run_tutorial(tutorial_name, package = "biostats.tutorials")
+```
+
+## Lintr
+finds problems in your style
+## Styler
+changes your code 
+
+<!-- naming-objects -->
+<!-- function-packages -->
+<!-- importing-data -->
+<!-- using-dplyr -->
+<!-- Dates-and-times -->
+<!-- text-manipulation -->
+
+
+## Naming objects
+
+```{r echo=TRUE}
+mean(1:10)
+
+result <- mean(1:10)
+result
+
+ls(all.names = TRUE)
+```
+
+## Using dplyr
+*dplyr - part of tidyverse;*
+
+*used to manipulate, plot and view dataframes*
+
+```{r echo=TRUE, include=FALSE}
+library("tidylog")
+```
+
+
+## Dates and times
+
+```{r echo=TRUE}
+dat <- "20 May 2021 16:15:10 CEST"
+as.POSIXct(dat, format = "%d %B %Y %H:%M:%S")
+#d = day, B = month (b = abbrev. month), etc..
+#help: ?strptime
+
+date1 <- "28/02/1999"
+as.Date(date1, format = "%x")
+# %x = dd/mm/yyy
+
+'''temperature2 %>% 
+  filter(between(Tid, 
+                 left = hm("06:00"), 
+                 right = hm("12:00")))
+
+%>% operator in dplyr is like | pipe in git
+'''
+
