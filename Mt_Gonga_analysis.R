@@ -2,16 +2,22 @@
 # importing data
 library(readxl)
 library(tidyverse)
-library(ggplot2)
+# library(ggplot2)
 
-biomass2015 <- read_excel("biomass2015.xls", sheet = 1)
+#### Data import #####
+biomass2015 <- 1:4 %>%
+  map_dfr(~read_excel(path = "biomass2015.xls", sheet = .x))
 
+
+'''
 for (i in 2:4) {
   biomass2015 <- rbind(biomass2015, read_excel("biomass2015.xls", sheet = i))
 }
 
-view(biomass2015)
+# view(biomass2015)
+'''
 
+#### data cleanup ####
 
 # excluding irrelevant columns
 biomass_clean <- biomass2015 %>%
@@ -21,7 +27,7 @@ biomass_clean <- biomass2015 %>%
   
   dplyr::mutate(site = factor(site,
                               levels = c("L", "M", "A", "H"))) %>%
-    #excluding NA values
+  #excluding NA values
   filter(!is.na(production)) %>%
   
   #grouping by site AND plot
@@ -32,8 +38,9 @@ biomass_clean <- biomass2015 %>%
 
 
 
-View(biomass_clean)
+#View(biomass_clean)
 
+#### plotting ####
 
 biomass_boxplot <- ggplot(biomass_clean,
                           aes(x = site, 
