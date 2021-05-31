@@ -1,0 +1,190 @@
+---
+title: "Bio302 Practical 1 Exploratory Data Analysis"
+author: "Richard J. Telford"
+date: "May 25, 2016"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Statistics intro 26.5.
+
+##Mean and median
+mean()
+median()
+
+##Standard deviation and variance
+###Standard Error
+SD = sqrt(n-1 * sum(y - µ)²)
+SE = SD/sqrt(n)
+
+##Covariance
+var(x,y) = cov(x,y)
+
+Sxy = Syx = (sum(x-µ)*(y-µ))/n-1
+
+##Correlation
+rxy = Sxy / sqrt(Sx²*Sy²)
+
+
+
+# Part 1 Peguins
+
+Load the `palmerpenguins` package and see the `penguins` data.
+```{r}
+library(palmerpenguins)
+library(tidyverse)
+```
+
+
+Find the range, mean, median and variance of variable `bill_length_mm`.
+
+What is the standard error of the mean of `bill_length_mm`.
+
+```{r}
+penguins %>% 
+  summarise(mean = mean(bill_length_mm, na.rm=TRUE), 
+            variance = var(bill_length_mm, na.rm=TRUE), 
+            median = median(bill_length_mm, na.rm=TRUE),
+            range = range(bill_length_mm, na.rm=TRUE),
+            std_error = (variance/sqrt(length(.))))
+
+#view(penguins)
+
+```
+
+
+Plot a histogram of variable `bill_length_mm`.
+
+Mark the position of the mean and median.
+
+```{r}
+bill_len_mean = mean(penguins$bill_length_mm, na.rm=TRUE)
+bill_len_median = median(penguins$bill_length_mm, na.rm=TRUE)
+
+bill_hist <- ggplot(penguins, aes(x=bill_length_mm)) + geom_histogram(fill="grey", binwidth = 0.5, bins = 50) +
+  labs(title = "Bill Length", x="Length in mm", y="Counts") +
+  geom_vline(xintercept = bill_len_mean, col="royalblue", size=0.7) +
+  geom_vline(xintercept = bill_len_median, col="red", size=0.7) 
+
+
+print(bill_hist)
+
+```
+
+
+Plot `bill_length_mm` against `bill_depth_mm`
+
+```{r}
+bill_len_dep <- ggplot(penguins, aes(x = bill_length_mm,
+                                     y = bill_depth_mm)) +
+  geom_point() +
+  labs(title = "Length vs. Depth",
+       x = "Bill Length (mm)",
+       y = "Bill Depth (mm)")
+
+
+print(bill_len_dep)
+```
+
+
+Find the covariance and correlation of `bill_length_mm` against `bill_depth_mm`.
+
+```{r}
+library(broom)
+co <- penguins %>%
+  summarise(covar = cov(x = bill_length_mm, 
+                        y = bill_depth_mm,
+                        use = "complete.obs"),
+            correl = cor(x = bill_length_mm,
+                         y = bill_depth_mm,
+                         use = "complete.obs"))
+
+co
+            
+```
+
+
+Is the correlation significant? (hint use cor.test())
+
+```{r}
+cor.sig <- broom::glance(cor.test(penguins$bill_length_mm, penguins$bill_depth_mm, use="pairwise.complete.obs"))
+cor.sig
+```
+
+The correlation coefficient is only slightly negative, but the covariance is strongly negative.
+
+
+How should the p-value be interpreted?
+
+the p-value gives an idea about how likely the null-hypothesis, so the case where differences between my tested groups are insignificant and arise purely by chance, can be rejected. Since my p-value is below the conventional 0.05 by three orders of magnitude, the null hypothesis can be rejected.
+
+
+There are three levels in factor `species` Plot `bill_length_mm` against `bill_depth_mm`, coloured by `species`
+
+```{r}
+bill_by_species <- ggplot(penguins, aes(x = bill_length_mm,
+                                     y = bill_depth_mm, col=species)) +
+  geom_point() +
+  labs(title = "Length vs. Depth by Species",
+       x = "Bill Length (mm)",
+       y = "Bill Depth (mm)")
+
+
+print(bill_by_species)
+```
+
+
+Is the correlation between `bill_length_mm` against `bill_depth_mm` significant for any of the groups?
+
+```{r}
+cor_species <- penguins %>%
+  group_by(species) %>%
+  summarise(cor = list(cor.test(bill_length_mm,
+                           bill_depth_mm,
+                           use = "pearson.obs.complete")),
+            .groups="drop")%>%
+  rowwise() %>%
+  mutate(pvalue = cor$p.value,
+         statistic = cor$statistic) %>%
+  select(species, pvalue, statistic)
+
+print(cor_species)
+```
+
+
+This is a sub-group analysis, what are the dangers of this type of analysis?
+
+Sub-group analysis is more prone to giving false-positive results due to reduced group size and loss of randomization of test vs. control "subjects".
+Any sub-group analysis should be planned *before* data is first analyzed, so as to avoid looking for correlations that might not be statistically significant.
+
+# Part 2 not penguins
+
+Install the `datasauRus` package with `install.packages("datasauRus")` and load it with `library`.
+
+```{r}
+library(datasauRus)
+```
+
+
+Dataset `datasaurus_dozen` has `x` and `y` variables and a dataset name. 
+For each dataset, calculate the mean and standard deviation of x and y and the correlationn between x and y.
+
+```{r}
+view(datasaurus_dozen)
+datasaurus_dozen %>%
+  group_by(dataset) %>%
+  summarise(mean.X = mean(x, na.rm = TRUE),
+            mean.Y = mean(y, na.rm = TRUE),
+            sd.X = sd(x, na.rm = TRUE),
+            sd.Y = sd(y, na.rm = TRUE),
+            corXY = cor(x = x, y = y, use = "complete.obs"))
+
+dinoplots <- ggplot(datasaurus_dozen, aes(x = x, y = y)) +
+  geom_point() +
+  facet_wrap(~ dataset)
+print(dinoplots)
+```
+

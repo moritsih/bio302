@@ -1,0 +1,118 @@
+---
+title: "Linear models"
+author: "Richard J. Telford"
+date: "May 26, 2016"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Linear Modelling Exercises
+
+1. Import the penguin data from the `palmerpenguin` package
+```{r library}
+library(palmerpenguins)
+```
+
+
+2. Do big birds have big beaks? Fit a linear model between bill length and body mass, and interpret the coefficients.
+
+```{r linear-model-bill-beak}
+fit.lm <- lm(bill_length_mm~body_mass_g, data = penguins)
+
+summary(fit.lm)
+
+beaks <- ggplot(fit.lm, aes(x=bill_length_mm, y=body_mass_g)) +
+  geom_point()
+
+print(beaks)
+
+beta0 <- coefficients(fit.lm)[1]
+beta1 <- coefficients(fit.lm)[2]
+```
+
+
+
+3. Examine the diagnostics plots. Is everything OK?
+
+```{r diagnostic-plots}
+par(mfrow=c(2,2))
+plot(fit.lm)
+```
+
+Normal Q-Q
+supposed to be a line; do residuals fit to a normal distribution? yes
+
+Residuals vs fitted
+Check for *outliers, variations in the mean res.*
+Win: the line is totally flat, like it's supposed to be
+
+Scale-Location
+want a flat line - not too flat but i guess it's okey
+
+
+
+3. Calculate the residual sum of squares (find sum the squared difference between the estimates calculated from the coefficients and the observed values).
+
+```{r rss}
+res_sum_sq <- sum((penguins$bill_length_mm - 
+                    (beta0 + 
+                       beta1 * penguins$body_mass_g))^2, na.rm=TRUE)
+
+res_sum_sq
+```
+
+
+4. Recalculate the Residual sum of squares using different values for the coefficients (in the formula yi = Beta + Beta xi + εi).
+
+```{r rss-new}
+res_sum_sq2 <- sum((penguins$bill_length_mm - 
+                    ((beta0+4) + 
+                       (beta1-0.001) * penguins$body_mass_g))^2, na.rm=TRUE)
+
+res_sum_sq2
+```
+
+
+5. Is the new RSS larger or smaller?
+
+the new RSS is larger, since the linear model fitted to the data should show the least squared distance between the residuals and the fitted line
+
+6. Estimate the slope using covariance and variance.
+
+```{r}
+
+#store the vectors as variables
+x <- penguins$body_mass_g
+y <- penguins$bill_length_mm
+
+   
+#slope using cov and var
+Sxy <- cov(x=x, y=y, use="complete.obs")
+Sx <- var(x=x, use="complete.obs")
+
+slope_b1 <- Sxy / (sqrt((Sx^2)*Sx^2))
+slope_b1
+```
+
+
+7. Do you get the same result? 
+
+Unsure - the same result as what?
+
+8. Add species to the model as a predictor.
+
+```{r}
+lm.fit2 <- lm(bill_length_mm ~ body_mass_g+species, data=penguins)
+lm.fit2
+```
+
+9. Does species improve the model?
+
+Yes, the species predictor does improve the model.
+(Need to ask what the coefficients under the species' names mean. correlations?)
+
+10. How should the coefficients be interpreted?
+

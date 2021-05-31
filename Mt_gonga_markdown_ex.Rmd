@@ -1,0 +1,56 @@
+---
+title: "Mt_gonga"
+author: "Moritz Haderer"
+date: "5/26/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r libraries, message=FALSE, warning=FALSE}
+library(readxl)
+library(tidyverse)
+```
+
+# Importing the data
+
+```{r data-import, message=FALSE, warning=FALSE}
+
+biomass2015 <- 1:4 %>%
+  map_dfr(~read_excel(path = "biomass2015.xls", sheet = .x))
+
+```
+
+# Cleaning the data
+
+```{r data-cleanup, message=FALSE}
+# excluding irrelevant columns
+biomass_clean <- biomass2015 %>%
+  
+  #selecting only relevant columns
+  select(c(site, plot, production)) %>%
+  
+  dplyr::mutate(site = factor(site,
+                              levels = c("L", "M", "A", "H"))) %>%
+  #excluding NA values
+  filter(!is.na(production)) %>%
+  
+  #grouping by site AND plot
+  group_by(site, plot) %>%
+  
+  #getting sum by plot
+  summarise(Total_biomass = sum(production))
+
+```
+
+# Creating meaningful visualizations
+
+```{r plotting, fig.cap="Biomass per site"}
+biomass_boxplot <- ggplot(biomass_clean,
+                          aes(x = site, 
+                              y = Total_biomass)) + geom_boxplot()
+
+print(biomass_boxplot)
+```
